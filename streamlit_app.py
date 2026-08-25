@@ -1,5 +1,5 @@
 import streamlit as st
-from openai import OpenAI, AuthenticationError
+from openai import APIError, AuthenticationError, OpenAI
 
 # Show title and description.
 st.title("MY Document question answering")
@@ -15,30 +15,18 @@ openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
 else:
-
     # Create an OpenAI client.
-    api_key = st.secrets.get("OPENAI_API_KEY", "bad_key")
     client = OpenAI(api_key=openai_api_key)
 
-try:
-    response = client.models.list()
-except AuthenticationError:
-    st.error("Invalid API key. Please check your credentials.")
-except Exception as e:
-    st.error(f"An error occurred: {e}")
-
-    # Let the user upload a file via `st.file_uploader`.
     uploaded_file = st.file_uploader(
         "Upload a document (.txt or .md)", type=("txt", "md")
     )
-
     # Ask the user for a question via `st.text_area`.
     question = st.text_area(
         "Now ask a question about the document!",
         placeholder="Can you give me a short summary?",
         disabled=not uploaded_file,
     )
-
     if uploaded_file and question:
 
         # Process the uploaded file and question.
@@ -50,12 +38,21 @@ except Exception as e:
             }
         ]
 
-        # Generate an answer using the OpenAI API.
-        stream = client.chat.completions.create(
-            model="gpt-4.1",
-            messages=messages,
-            stream=True,
-        )
+        try:
+            # Generate an answer using the OpenAI API.
+            stream = client.chat.completions.create(
+                model="gpt-4.1",
+                messages=messages,
+                stream=True,
+            )
 
-        # Stream the response to the app using `st.write_stream`.
-        st.write_stream(stream)
+            # Stream the response to the app using `st.write_stream`.
+            st.write_stream(stream)
+        except AuthenticationError:
+            st.error(
+                "Invalid OpenAI API key. Please check the key you entered."
+            )
+        except APIError as e:
+            st.error(f"OpenAI API error: {e}")
+        except Exception as e:
+            st.error(f"Unexpected error: {e}")
