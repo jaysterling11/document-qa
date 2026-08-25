@@ -22,7 +22,6 @@ else:
 
 try:
     response = client.models.list()
-    st.success("API key is valid!")
 except AuthenticationError:
     st.error("Invalid API key. Please check your credentials.")
 except Exception as e:
