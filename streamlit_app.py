@@ -18,6 +18,25 @@ else:
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
 
+    try:
+        client.models.list()
+
+    except AuthenticationError:
+        st.error(
+            "Invalid OpenAI API key. Please check the key you entered."
+        )
+        st.stop()
+
+    except APIError as e:
+        st.error(f"OpenAI API error: {e}")
+        st.stop()
+
+    except Exception as e:
+        st.error(f"Unable to connect to OpenAI: {e}")
+        st.stop()
+
+    st.success("API key accepted! You can use the document Q&A app.")
+
     uploaded_file = st.file_uploader(
         "Upload a document (.txt or .md)", type=("txt", "md")
     )
@@ -25,8 +44,9 @@ else:
     question = st.text_area(
         "Now ask a question about the document!",
         placeholder="Can you give me a short summary?",
-        disabled=not uploaded_file,
+        disabled=not uploaded_file is None
     )
+
     if uploaded_file and question:
 
         # Process the uploaded file and question.
@@ -48,11 +68,6 @@ else:
 
             # Stream the response to the app using `st.write_stream`.
             st.write_stream(stream)
-        except AuthenticationError:
-            st.error(
-                "Invalid OpenAI API key. Please check the key you entered."
-            )
+
         except APIError as e:
             st.error(f"OpenAI API error: {e}")
-        except Exception as e:
-            st.error(f"Unexpected error: {e}")
