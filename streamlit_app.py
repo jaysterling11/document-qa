@@ -1,5 +1,5 @@
 import streamlit as st
-from openai import OpenAI
+from openai import OpenAI, AuthenticationError
 
 # Show title and description.
 st.title("MY Document question answering")
@@ -17,7 +17,16 @@ if not openai_api_key:
 else:
 
     # Create an OpenAI client.
+    api_key = st.secrets.get("OPENAI_API_KEY", "bad_key")
     client = OpenAI(api_key=openai_api_key)
+
+try:
+    response = client.models.list()
+    st.success("API key is valid!")
+except AuthenticationError:
+    st.error("Invalid API key. Please check your credentials.")
+except Exception as e:
+    st.error(f"An error occurred: {e}")
 
     # Let the user upload a file via `st.file_uploader`.
     uploaded_file = st.file_uploader(
