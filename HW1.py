@@ -1,5 +1,7 @@
 import streamlit as st
 from openai import APIError, AuthenticationError, OpenAI
+import streamlit as st
+import fitz
 
 # Show title and description.
 st.title("MY Document question answering")
@@ -38,8 +40,17 @@ else:
     st.success("API key accepted! You can use the document Q&A app.")
 
     uploaded_file = st.file_uploader(
-        "Upload a document (.txt or .md)", type=("txt", "md")
+        "Upload a document (.txt or .pdf)", type=("txt", "pdf")
     )
+
+    file_extension = uploaded_file.name.split('.')[-1]
+if file_extension == 'txt':
+document = uploaded_file.read().decode()
+elif file_extension == 'pdf':
+document = read_pdf(uploaded_file)
+else:
+st.error("Unsupported file type."
+         
     # Ask the user for a question via `st.text_area`.
     question = st.text_area(
         "Now ask a question about the document!",
@@ -61,7 +72,7 @@ else:
         try:
             # Generate an answer using the OpenAI API.
             stream = client.chat.completions.create(
-                model="gpt-4.1",
+                model="gpt-3.5",
                 messages=messages,
                 stream=True,
             )
