@@ -43,13 +43,15 @@ else:
         "Upload a document (.txt or .pdf)", type=("txt", "pdf")
     )
 
-    file_extension = uploaded_file.name.split('.')[-1]
+file_extension = uploaded_file.name.split('.')[-1]
 if file_extension == 'txt':
-document = uploaded_file.read().decode()
+    document = uploaded_file.read().decode()
+
 elif file_extension == 'pdf':
-document = read_pdf(uploaded_file)
+    document = read_pdf(uploaded_file)
+
 else:
-st.error("Unsupported file type."
+    st.error("Unsupported file type."
          
     # Ask the user for a question via `st.text_area`.
     question = st.text_area(
